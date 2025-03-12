@@ -18,6 +18,6 @@ func Crawle() {
 		return
 	}
 	for _, v := range pages {
-		models.CreatePostLink(database.DB, v)
+		_ = models.CreatePostLink(database.DB, v)
 	}
 }

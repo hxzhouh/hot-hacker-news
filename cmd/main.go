@@ -13,13 +13,6 @@ import (
 	"github.com/robfig/cron"
 )
 
-// 返回一个支持至 秒 级别的 cron
-func newWithSeconds() *cron.Cron {
-	secondParser := cron.NewParser(cron.Second | cron.Minute |
-		cron.Hour | cron.Dom | cron.Month | cron.DowOptional | cron.Descriptor)
-	return cron.New(cron.WithParser(secondParser), cron.WithChain())
-}
-
 func main() {
 
 	// 初始化数据库
@@ -34,25 +27,31 @@ func main() {
 			log.Printf("关闭数据库连接失败: %v", err)
 		}
 	}()
-	db.AutoMigrate(&models.PostLink{})
-	c := newWithSeconds()
+	_ = db.AutoMigrate(&models.PostLink{})
+	c := cron.New()
 	spec := "0 0 17 * * ?" // 每天17点运行一次
-	c.AddFunc(spec, hackernews.Crawle())
+	err = c.AddFunc(spec, hackernews.Crawle)
+	if err != nil {
+		slog.Error("添加定时任务失败: %v", err)
+		return
+	}
 	c.Start()
 	timeAfter := time.Now().AddDate(0, 0, -500)
 	i := 0
-	for {
+	for i < 500 {
 		urlPath := "https://www.daemonology.net/hn-daily/%s.html"
 		day := timeAfter.Format("2006-01-02")
 		urlPath = fmt.Sprintf(urlPath, day)
-		timeAfter.AddDate(0, 0, 1)
 		i += 1
 		pages, err := hackernews.ParseDailyPage(urlPath)
 		if err != nil {
 			slog.Error("解析页面失败: %v", err)
+			return
 		}
 		for _, v := range pages {
-			models.CreatePostLink(database.DB, v)
+			_ = models.CreatePostLink(database.DB, v)
 		}
+		timeAfter = timeAfter.AddDate(0, 0, 1)
+		fmt.Println(timeAfter.Format("2006-01-02"))
 	}
 }
