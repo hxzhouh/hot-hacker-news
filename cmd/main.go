@@ -6,13 +6,16 @@ import (
 	"hot-hacker-new/pkg/hackernews"
 	"log"
 	"log/slog"
+	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"github.com/robfig/cron"
 )
 
 func main() {
-
+	initLog()
 	// 初始化数据库
 	dbPath := filepath.Join("data", "hackernews.db")
 	db, err := database.InitDB(dbPath)
@@ -34,23 +37,21 @@ func main() {
 		return
 	}
 	c.Start()
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+	log.Println("退出...")
+	c.Stop()
+	os.Exit(0)
+}
 
-	// timeAfter := time.Now().AddDate(0, 0, -500)
-	// i := 0
-	// for i < 500 {
-	// 	urlPath := "https://www.daemonology.net/hn-daily/%s.html"
-	// 	day := timeAfter.Format("2006-01-02")
-	// 	urlPath = fmt.Sprintf(urlPath, day)
-	// 	i += 1
-	// 	pages, err := hackernews.ParseDailyPage(urlPath)
-	// 	if err != nil {
-	// 		slog.Error("解析页面失败: %v", err)
-	// 		return
-	// 	}
-	// 	for _, v := range pages {
-	// 		_ = models.CreatePostLink(database.DB, v)
-	// 	}
-	// 	timeAfter = timeAfter.AddDate(0, 0, 1)
-	// 	fmt.Println(timeAfter.Format("2006-01-02"))
-	// }
+func initLog() {
+	f, err := os.OpenFile("hackernews.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("failed to open log file: %v", err)
+	}
+	handler := slog.NewTextHandler(f, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+	slog.SetDefault(slog.New(handler))
 }

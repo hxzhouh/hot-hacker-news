@@ -25,3 +25,7 @@ go.work.sum
 # env file
 .env
 
+!/data/
+!/data/hackernews.db
+!/data/translate_prompt
+./idea
