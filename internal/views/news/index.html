@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日Hot Hacker News</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    {{ template "layout.html" . }}
+
+    <div class="container">
+        <h1>新闻列表</h1>
+        <ul>
+            {{ range .Posts }}
+                <li>
+                    <a href="/news/{{ .ID }}">{{ .Title }}</a>
+                    <p>{{ .Summary }}</p>
+                </li>
+            {{ end }}
+        </ul>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

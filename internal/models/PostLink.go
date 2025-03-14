@@ -72,3 +72,14 @@ func FindOrCreateByLink(db *gorm.DB, post *PostLink) (*PostLink, bool, error) {
 	// 返回已存在的记录
 	return &existingPost, false, nil
 }
+
+func FindLastDatePost(db *gorm.DB) (string, []PostLink, error) {
+	var post PostLink
+	result := db.Order("date desc").First(&post)
+	if result.Error == gorm.ErrRecordNotFound {
+		return "", nil, nil
+	}
+	var posts []PostLink
+	result = db.Where("date=?", post.Date).Order("id asc").Find(&posts)
+	return post.Date, posts, result.Error
+}
