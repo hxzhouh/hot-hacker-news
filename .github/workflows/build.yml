@@ -31,7 +31,7 @@ jobs:
       run: go test -v ./...
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: hot-hacker-news
         path: output/hot-hacker-news
