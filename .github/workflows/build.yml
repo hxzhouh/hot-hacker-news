@@ -25,8 +25,7 @@ jobs:
       run: go mod tidy
 
     - name: Build
-      run: go build -v -o output/hot-hacker-news ./...
-
+      run: mkdir -p output && go build -v -o output/hot-hacker-news cmd/main.go
     - name: Run tests
       run: go test -v ./...
 
