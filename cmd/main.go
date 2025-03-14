@@ -20,12 +20,12 @@ func main() {
 	dbPath := filepath.Join("data", "hackernews.db")
 	db, err := database.InitDB(dbPath)
 	if err != nil {
-		slog.Error("初始化数据库失败: %v", err)
+		slog.Error("初始化数据库失败:", slog.Any("error", err))
 		return
 	}
 	defer func() {
 		if err := database.CloseDB(); err != nil {
-			log.Printf("关闭数据库连接失败: %v", err)
+			slog.Error("关闭数据库连接失败:", slog.Any("error", err))
 		}
 	}()
 	_ = db.AutoMigrate(&models.PostLink{})
@@ -33,7 +33,7 @@ func main() {
 	spec := "0 0 17 * * ?" // 每天17点运行一次
 	err = c.AddFunc(spec, hackernews.Crawle)
 	if err != nil {
-		slog.Error("添加定时任务失败: %v", err)
+		slog.Error("添加定时任务失败", slog.Any("error", err))
 		return
 	}
 	c.Start()

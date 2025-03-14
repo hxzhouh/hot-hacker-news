@@ -2,11 +2,12 @@ package hackernews
 
 import (
 	"fmt"
-	"golang.org/x/net/html"
 	"hot-hacker-new/internal/models"
 	"net/http"
 	"regexp"
 	"time"
+
+	"golang.org/x/net/html"
 )
 
 func ParseDailyPage(url string) ([]*models.PostLink, error) {
